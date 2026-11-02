@@ -2,6 +2,36 @@ import {useEffect,useRef,useState} from 'react';
 import {HashRouter,Routes,Route,NavLink,Link,useParams,useLocation} from 'react-router-dom';
 import {sb,asset} from './supabase';import Admin from './Admin';
 const cats=p=>(p.project_categories||[]).map(x=>x.categories).filter(Boolean);
+export const DEFAULT_ABOUT = {
+  intro: `Hi, I’m Amba Bhadra Thampuran — a Visual Communication Designer exploring the intersections of branding, advertising, filmmaking, and visual storytelling.\n\nMy work lives at the meeting point of narrative clarity and cinematic atmosphere. I believe that whether you are building a brand from scratch, directing a motion sequence, or designing a campaign, every frame and typographic decision is an opportunity to tell an honest, lasting story.`,
+  philosophy: `Design is where emotion meets intention. I approach visual communication as a dynamic medium — experimenting across disciplines to create work that feels tactile, thoughtful, and culturally resonant.`,
+  skills: [
+    'Brand Identity & Systems',
+    'Advertising & Campaigns',
+    'Filmmaking & Direction',
+    'Visual Storytelling',
+    'Motion Graphics & Video',
+    'Creative & Art Direction',
+    'Editorial & Typography',
+    'Packaging & Print'
+  ],
+  tools: [
+    'Adobe Premiere Pro',
+    'Adobe After Effects',
+    'Adobe Illustrator',
+    'Adobe Photoshop',
+    'Adobe InDesign',
+    'Figma',
+    'DaVinci Resolve'
+  ],
+  experience: [
+    'Visual Communication Designer — Freelance & Creative Collaborations',
+    'Brand Identity Systems & Visual Direction',
+    'Advertising Concepts & Commercial Visuals',
+    'Short Films, Motion Pieces & Narrative Projects'
+  ],
+  resume_url: ''
+};
 function useProjects(){const[s,set]=useState({loading:true,error:null,data:[]});
 useEffect(()=>{sb.from('projects').select('*,project_categories(categories(name,slug))').eq('published',true).order('sort_order').then(({data,error})=>set({loading:false,error:error?.message,data:data||[]}))},[]);return s}
 function useSetting(key){const[v,set]=useState({});useEffect(()=>{sb.from('site_settings').select('value').eq('key',key).maybeSingle().then(({data})=>set(data?.value||{}))},[key]);return v}
@@ -23,14 +53,15 @@ return <><div className="wrap"><nav><Link to="/" className="logo"><small>Hi I’
 <div>{[['Instagram',ct.instagram],['Behance',ct.behance],['LinkedIn',ct.linkedin]].filter(x=>x[1]).map(([l,u])=><a key={l} href={u} target="_blank" rel="noreferrer">{l}</a>)}
 <button className="chip" style={{color:'var(--cream)',borderColor:'var(--cream)'}} onClick={()=>window.scrollTo({top:0,behavior:'smooth'})}>Back to top ↑</button></div></div>
 <p style={{marginTop:30,opacity:.7,fontSize:'.85rem'}}>© {new Date().getFullYear()} {name}. All work belongs to its creator.</p></div></footer></>}
-function Home(){const s=useProjects();const h=useSetting('hero');const a=useSetting('about')
+function Home(){const s=useProjects();const h=useSetting('hero');const a=useSetting('about');
+const intro=a.intro||DEFAULT_ABOUT.intro;
 return <><div className="wrap"><section className="hero"><div><p className="eyebrow">{h.eyebrow||'Visual Communication Designer'}</p>
 <h1>Between <em>brand,</em><br/>film &amp; <em>story.</em></h1><p>{h.statement||'Exploring the space between branding, advertising, filmmaking and visual storytelling.'}</p>
 <Link className="btn" to="/work">Explore my work →</Link></div><div className="blob" aria-hidden="true"/></section></div>
 <section className="sec"><div className="wrap"><div className="sechead"><h2>Selected <em>work</em></h2><span className="eyebrow">{s.data.length} projects</span></div>
 <Status s={s}/><div className="grid">{s.data.map((p,i)=><Reveal key={p.id}><Card p={p} i={i}/></Reveal>)}</div></div></section>
 <section className="sec dough"><div className="wrap"><Reveal><p className="eyebrow">About</p><h2 className="big">A curious designer who <em>plays</em> across disciplines.</h2>
-{a.intro&&<p className="prose">{a.intro.slice(0,320)}</p>}<Link className="btn ghost" to="/about">More about me</Link></Reveal></div></section>
+{intro&&<p className="prose" style={{marginBottom:24}}>{intro.slice(0,320)}…</p>}<Link className="btn ghost" to="/about">More about me</Link></Reveal></div></section>
 <section className="sec"><div className="wrap"><Reveal><p className="eyebrow">Contact</p><h2 className="big">Let’s make something <em>together.</em></h2><Link className="btn" to="/contact">Say hello</Link></Reveal></div></section></>}
 function Work(){const s=useProjects();const[f,setF]=useState('all');const all=[...new Map(s.data.flatMap(cats).map(c=>[c.slug,c])).values()];
 const list=s.data.filter(p=>f==='all'||cats(p).some(c=>c.slug===f));
@@ -50,10 +81,36 @@ return <article className="wrap sec"><p className="eyebrow">{cats(p).map(c=>c.na
 {p.embed_url&&<iframe title={p.title} src={p.embed_url} style={{width:'100%',height:600,border:0,marginTop:30,borderRadius:6}}/>}
 {imgs.length>0&&<div className="gal">{imgs.map(i=><img key={i.id} src={i.url} alt={i.caption||p.title} loading="lazy"/>)}</div>}
 {p.external_url&&<a className="btn" href={p.external_url} target="_blank" rel="noreferrer">{p.external_label||'View original project'} ↗</a>}</article>}
-function About(){const a=useSetting('about');const ct=useSetting('contact');const L=(t,arr)=>arr?.length>0&&<><h3 style={{marginTop:36}}>{t}</h3><p>{arr.join(' · ')}</p></>
-return <div className="wrap sec"><h1 className="big">About <em>me</em></h1><div className="prose">{a.intro||'Introduction coming soon — editable in the admin dashboard.'}</div>
-{a.philosophy&&<><h3 style={{marginTop:36}}>Creative philosophy</h3><p className="prose">{a.philosophy}</p></>}{L('Disciplines',a.skills)}{L('Tools',a.tools)}{L('Experience',a.experience)}
-{a.resume_url&&<a className="btn" href={a.resume_url} target="_blank" rel="noreferrer">Resume ↗</a>}</div>}
+function About(){
+  const s=useSetting('about');
+  const a={
+    intro:s.intro||DEFAULT_ABOUT.intro,
+    philosophy:s.philosophy||DEFAULT_ABOUT.philosophy,
+    skills:s.skills?.length?s.skills:DEFAULT_ABOUT.skills,
+    tools:s.tools?.length?s.tools:DEFAULT_ABOUT.tools,
+    experience:s.experience?.length?s.experience:DEFAULT_ABOUT.experience,
+    resume_url:s.resume_url||DEFAULT_ABOUT.resume_url
+  };
+  return <div className="wrap sec">
+    <p className="eyebrow">Visual Communication Designer</p>
+    <h1 className="big">About <em>me</em></h1>
+    <p className="it" style={{fontSize:'1.3rem',maxWidth:700,marginBottom:28,color:'var(--toast)',lineHeight:1.4}}>
+      Exploring the space between branding, advertising, filmmaking and visual storytelling.
+    </p>
+    <div className="prose">{a.intro}</div>
+    {a.philosophy&&<><h3 style={{marginTop:44,marginBottom:12}}>Creative philosophy</h3><p className="prose">{a.philosophy}</p></>}
+    <dl style={{marginTop:44}}>
+      {a.skills?.length>0&&<div style={{display:'contents'}}><dt>Disciplines</dt><dd><div style={{display:'flex',flexWrap:'wrap',gap:8}}>{a.skills.map((k,i)=><span key={i} className="chip" style={{cursor:'default'}}>{k}</span>)}</div></dd></div>}
+      {a.tools?.length>0&&<div style={{display:'contents'}}><dt>Tools &amp; Craft</dt><dd style={{lineHeight:1.8}}>{a.tools.join(' · ')}</dd></div>}
+      {a.experience?.length>0&&<div style={{display:'contents'}}><dt>Experience</dt><dd><ul style={{listStyle:'none',padding:0,margin:0,display:'grid',gap:8}}>{a.experience.map((e,i)=><li key={i}>— {e}</li>)}</ul></dd></div>}
+    </dl>
+    <div style={{display:'flex',gap:14,alignItems:'center',marginTop:36,flexWrap:'wrap'}}>
+      <Link className="btn" to="/contact">Let’s collaborate →</Link>
+      <Link className="btn ghost" to="/work">View my work →</Link>
+      {a.resume_url&&<a className="btn ghost" href={a.resume_url} target="_blank" rel="noreferrer">Resume ↗</a>}
+    </div>
+  </div>;
+}
 function Contact(){const ct=useSetting('contact');const[f,setF]=useState({name:'',email:'',message:''});const[st,setSt]=useState('idle');const[err,setErr]=useState('');
 async function send(e){e.preventDefault();setErr('');if(!f.name.trim()||!/^\S+@\S+\.\S+$/.test(f.email)||!f.message.trim())return setErr('Please fill in your name, a valid email and a message.');
 setSt('sending');const{error}=await sb.from('contact_messages').insert(f);if(error){setSt('idle');setErr('Something went wrong. Please try again.')}else setSt('done')}
