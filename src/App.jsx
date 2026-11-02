@@ -54,7 +54,8 @@ return <><div className="wrap"><nav><Link to="/" className="logo"><small>Hi I’
 <button className="chip" style={{color:'var(--cream)',borderColor:'var(--cream)'}} onClick={()=>window.scrollTo({top:0,behavior:'smooth'})}>Back to top ↑</button></div></div>
 <p style={{marginTop:30,opacity:.7,fontSize:'.85rem'}}>© {new Date().getFullYear()} {name}. All work belongs to its creator.</p></div></footer></>}
 function Home(){const s=useProjects();const h=useSetting('hero');const a=useSetting('about');
-const intro=a.intro||DEFAULT_ABOUT.intro;
+const isPlaceholder=!a.intro||a.intro.includes('coming soon')||a.intro.includes('admin dashboard');
+const intro=isPlaceholder?DEFAULT_ABOUT.intro:a.intro;
 return <><div className="wrap"><section className="hero"><div><p className="eyebrow">{h.eyebrow||'Visual Communication Designer'}</p>
 <h1>Between <em>brand,</em><br/>film &amp; <em>story.</em></h1><p>{h.statement||'Exploring the space between branding, advertising, filmmaking and visual storytelling.'}</p>
 <Link className="btn" to="/work">Explore my work →</Link></div><div className="blob" aria-hidden="true"/></section></div>
@@ -83,8 +84,9 @@ return <article className="wrap sec"><p className="eyebrow">{cats(p).map(c=>c.na
 {p.external_url&&<a className="btn" href={p.external_url} target="_blank" rel="noreferrer">{p.external_label||'View original project'} ↗</a>}</article>}
 function About(){
   const s=useSetting('about');
+  const isPlaceholder=!s.intro||s.intro.includes('coming soon')||s.intro.includes('admin dashboard');
   const a={
-    intro:s.intro||DEFAULT_ABOUT.intro,
+    intro:isPlaceholder?DEFAULT_ABOUT.intro:s.intro,
     philosophy:s.philosophy||DEFAULT_ABOUT.philosophy,
     skills:s.skills?.length?s.skills:DEFAULT_ABOUT.skills,
     tools:s.tools?.length?s.tools:DEFAULT_ABOUT.tools,
