@@ -1,20 +1,18 @@
-# Portfolio
+# Portfolio — GitHub Pages
 
-Vite + React + Supabase. Admin at `/admin`.
+The built website is in the `docs/` folder. GitHub Pages serves it directly — no build step needed.
 
-## Run locally
-1. `npm install`
-2. Copy `.env.example` to `.env`
-3. `npm run dev`
+## Publish
+1. Create a new **public** GitHub repository (any name, e.g. `portfolio`).
+2. Upload everything from this folder (drag the files and folders in, or use GitHub Desktop).
+3. Repository **Settings → Pages → Build and deployment**: Source = **Deploy from a branch**, Branch = **main**, folder = **/docs**, then **Save**.
+4. After 1–2 minutes your site is live at `https://<username>.github.io/<repo-name>/`.
 
-## Make yourself admin
-1. Supabase > Authentication > Users > Add user (email + password). Turn off public sign-ups.
-2. Sign in at `/admin`. It shows your user id and the SQL line to run in the SQL editor:
-   `insert into public.admin_users (user_id) values ('<your-user-id>');`
+## Admin dashboard (edit without code)
+- Your site address + `#/admin` (e.g. `https://<username>.github.io/portfolio/#/admin`).
+- In Supabase: Authentication → Users → Add user (email + password).
+- Sign in at the admin page; it shows one line of SQL. Run it once in Supabase → SQL Editor to make yourself admin.
+- Then add/edit/reorder projects, upload covers and edit site content.
 
-## Deploy to Vercel (free tier)
-1. Push this folder to GitHub.
-2. Vercel > Add New > Project > import the repo (Vite is detected automatically).
-3. Add environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
-4. Deploy. `vercel.json` rewrites all routes so refreshing project pages works.
-5. Supabase > Authentication > URL Configuration: add your `*.vercel.app` URL as the Site URL.
+## Changing the code later (optional)
+`npm install`, copy `.env.example` to `.env`, `npm run dev` to preview, `npm run build` to refresh `docs/`, then commit the updated `docs/` folder.
